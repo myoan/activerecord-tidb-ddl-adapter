@@ -9,6 +9,7 @@ A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific feat
   - `auto_id_cache`: Configure AUTO_ID_CACHE for better auto-increment performance
   - `shard_row_id_bits`: Distribute row IDs across multiple shards
   - `pre_split_regions`: Pre-split table regions for better initial performance
+- **AUTO_RANDOM Support**: Generate randomized primary key values to avoid write hotspots (column-level `auto_random` option)
 - **TiDB 5.0+ Compatible**: Supports TiDB's clustered index feature introduced in version 5.0
 - **MySQL-Compatible DDL**: TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`), which MySQL ignores — the same migrations run against both TiDB and MySQL
 - **Seamless Integration**: Extends the standard MySQL2 adapter, maintaining compatibility with existing Rails applications
@@ -219,6 +220,34 @@ CREATE TABLE `events` (
   PRIMARY KEY (`id`) /*T![clustered_index] NONCLUSTERED */
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T! SHARD_ROW_ID_BITS=4 PRE_SPLIT_REGIONS=2 */
 ```
+
+#### AUTO_RANDOM
+
+Generate randomized primary key values to avoid write hotspots on clustered primary keys. `auto_random` is a column-level option and replaces `AUTO_INCREMENT` (the two are mutually exclusive), so define the primary key column explicitly with `id: false`:
+
+```ruby
+class CreateTickets < ActiveRecord::Migration[7.2]
+  def change
+    create_table :tickets, id: false do |t|
+      t.bigint :id, primary_key: true, auto_random: 5, null: false
+      t.string :subject
+      t.timestamps
+    end
+  end
+end
+```
+
+This generates:
+
+```sql
+CREATE TABLE `tickets` (
+  `id` bigint NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,
+  `subject` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+```
+
+`auto_random` accepts `true` (server default shard bits), an Integer (shard bits), or an Array of `[shard_bits, range_bits]`. Note that AUTO_RANDOM requires a `bigint` clustered primary key, and that on MySQL the comment is ignored, so the column is a plain `bigint` primary key — applications must supply ids themselves there.
 
 ## Development
 

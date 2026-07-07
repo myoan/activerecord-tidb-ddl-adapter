@@ -49,6 +49,24 @@ class GeneratedSqlTableOptions < ActiveRecord::Migration[7.2]
   end
 end
 
+class GeneratedSqlAutoRandom < ActiveRecord::Migration[7.2]
+  def change
+    create_table :users, id: false do |t|
+      t.bigint :id, primary_key: true, auto_random: 5, null: false
+      t.string "name"
+    end
+  end
+end
+
+class GeneratedSqlAutoRandomDefault < ActiveRecord::Migration[7.2]
+  def change
+    create_table :users, id: false do |t|
+      t.bigint :id, primary_key: true, auto_random: true, null: false
+      t.string "name"
+    end
+  end
+end
+
 class GeneratedSqlWithoutConfig < ActiveRecord::Migration[7.2]
   def change
     create_table :users do |t|
@@ -111,6 +129,24 @@ class Activerecord::Tidb::GeneratedSqlTest < Minitest::Test
     assert_includes sql, "DEFAULT CHARSET=utf8mb4"
     assert_includes sql, "COLLATE=utf8mb4_bin"
     assert_includes sql, "COMMENT 'user table'"
+  end
+
+  def test_auto_random_uses_version_comment
+    sql = capture_create_table_sql(GeneratedSqlAutoRandom)
+    assert_includes sql, "/*T![auto_rand] AUTO_RANDOM(5) */"
+  end
+
+  def test_auto_random_without_args_uses_version_comment
+    sql = capture_create_table_sql(GeneratedSqlAutoRandomDefault)
+    assert_includes sql, "/*T![auto_rand] AUTO_RANDOM */"
+  end
+
+  def test_auto_random_conflicts_with_auto_increment
+    assert_raises(ArgumentError) do
+      connection.create_table :users, id: false do |t|
+        t.bigint :id, primary_key: true, auto_random: 5, auto_increment: true, null: false
+      end
+    end
   end
 
   def test_without_tidb_options_generates_plain_mysql_ddl

@@ -29,11 +29,29 @@ module ActiveRecord
             if options[:primary_key] == true
               sql << clustered_index_sql(options[:clustered])
             end
+            if options[:auto_random]
+              sql << auto_random_sql(options[:auto_random])
+            end
             sql
           end
 
           # TiDB executes version comments (/*T![feature_id] ... */) while
           # MySQL ignores them, so the generated DDL stays MySQL-compatible.
+          # auto_random accepts true (server default shard bits), an Integer
+          # (shard bits), or an Array of [shard_bits, range_bits].
+          def auto_random_sql(auto_random)
+            args =
+              case auto_random
+              when true
+                ""
+              when Array
+                "(#{auto_random.join(', ')})"
+              else
+                "(#{auto_random})"
+              end
+            " /*T![auto_rand] AUTO_RANDOM#{args} */"
+          end
+
           def clustered_index_sql(clustered)
             case clustered
             when true

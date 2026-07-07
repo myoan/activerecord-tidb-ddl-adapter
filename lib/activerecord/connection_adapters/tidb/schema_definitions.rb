@@ -38,6 +38,14 @@ module ActiveRecord
         end
 
         def new_column_definition(name, type, **options)
+          if options[:auto_random]
+            if options[:auto_increment]
+              raise ArgumentError, "auto_random and auto_increment are mutually exclusive"
+            end
+            # Prevent Rails from implicitly adding AUTO_INCREMENT to integer
+            # primary keys; TiDB rejects it in combination with AUTO_RANDOM.
+            options[:auto_increment] = false
+          end
           if @auto_id_cache
             options[:auto_id_cache] = @auto_id_cache
           end
@@ -52,7 +60,7 @@ module ActiveRecord
 
         private
           def valid_column_definition_options
-            super + [:auto_id_cache, :clustered, :pre_split_regions, :shard_row_id_bits]
+            super + [:auto_id_cache, :auto_random, :clustered, :pre_split_regions, :shard_row_id_bits]
           end
       end
     end

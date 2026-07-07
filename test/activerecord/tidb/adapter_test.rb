@@ -60,6 +60,15 @@ class MultiKeyWithoutConfig < ActiveRecord::Migration[7.2]
   end
 end
 
+class AutoRandomInColumn < ActiveRecord::Migration[7.2]
+  def change
+    create_table :users, id: false do |t|
+      t.bigint :id, primary_key: true, auto_random: 5, null: false
+      t.string "name"
+    end
+  end
+end
+
 class Activerecord::Tidb::AdapterTest < Minitest::Test
   attr_reader :connection
 
@@ -156,6 +165,21 @@ class Activerecord::Tidb::AdapterTest < Minitest::Test
         `id` bigint NOT NULL,
         `name` varchar(255) NOT NULL,
         PRIMARY KEY (`id`,`name`) /*T![clustered_index] CLUSTERED */
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+    QUERY
+    assert_equal expected_query, query
+  end
+
+  def test_auto_random_in_column
+    migrate(AutoRandomInColumn)
+
+    result = connection.execute("SHOW CREATE TABLE users")
+    _, query = result.first
+    expected_query = <<~QUERY.strip
+      CREATE TABLE `users` (
+        `id` bigint NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,
+        `name` varchar(255) DEFAULT NULL,
+        PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
     QUERY
     assert_equal expected_query, query
