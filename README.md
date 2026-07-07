@@ -10,6 +10,7 @@ A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific feat
   - `shard_row_id_bits`: Distribute row IDs across multiple shards
   - `pre_split_regions`: Pre-split table regions for better initial performance
 - **TiDB 5.0+ Compatible**: Supports TiDB's clustered index feature introduced in version 5.0
+- **MySQL-Compatible DDL**: TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`), which MySQL ignores — the same migrations run against both TiDB and MySQL
 - **Seamless Integration**: Extends the standard MySQL2 adapter, maintaining compatibility with existing Rails applications
 
 ## Installation
@@ -79,7 +80,7 @@ CREATE TABLE `users` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`) CLUSTERED
+  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
@@ -104,7 +105,7 @@ CREATE TABLE `products` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `price` decimal(10,0) DEFAULT NULL,
-  PRIMARY KEY (`id`) NONCLUSTERED
+  PRIMARY KEY (`id`) /*T![clustered_index] NONCLUSTERED */
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
@@ -165,8 +166,8 @@ This generates:
 CREATE TABLE `users` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`) CLUSTERED
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_ID_CACHE=1000
+  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_id_cache] AUTO_ID_CACHE=1000 */
 ```
 
 #### SHARD_ROW_ID_BITS
@@ -190,8 +191,8 @@ This generates:
 CREATE TABLE `logs` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `message` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`) NONCLUSTERED
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin SHARD_ROW_ID_BITS=4
+  PRIMARY KEY (`id`) /*T![clustered_index] NONCLUSTERED */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T! SHARD_ROW_ID_BITS=4 */
 ```
 
 #### PRE_SPLIT_REGIONS
@@ -215,8 +216,8 @@ This generates:
 CREATE TABLE `events` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `event_type` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`) NONCLUSTERED
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin SHARD_ROW_ID_BITS=4 PRE_SPLIT_REGIONS=2
+  PRIMARY KEY (`id`) /*T![clustered_index] NONCLUSTERED */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T! SHARD_ROW_ID_BITS=4 PRE_SPLIT_REGIONS=2 */
 ```
 
 ## Development

@@ -6,12 +6,12 @@ module ActiveRecord
       class TableDefinition < MySQL::TableDefinition
         attr_reader :clustered, :shard_row_id_bits, :pre_split_regions, :auto_id_cache
 
-        def initialize(conn, name, charset: nil, collation: nil, clustered: nil, shard_row_id_bits: nil, pre_split_regions: nil, auto_id_cache: nil, **)
+        def initialize(conn, name, clustered: nil, shard_row_id_bits: nil, pre_split_regions: nil, auto_id_cache: nil, **)
           @auto_id_cache = auto_id_cache
           @clustered = clustered
           @pre_split_regions = pre_split_regions
           @shard_row_id_bits = shard_row_id_bits
-          super(conn, name, charset: charset, collation: collation)
+          super(conn, name, **)
         end
 
         def set_primary_key(table_name, id, primary_key, **options)
