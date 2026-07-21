@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Ruby gem providing a Rails ActiveRecord adapter for TiDB. It extends the standard `Mysql2Adapter` to support TiDB-specific DDL features in migrations: clustered/non-clustered primary keys (`clustered: true/false`), `auto_id_cache`, `shard_row_id_bits`, and `pre_split_regions` table options, and the column-level `auto_random` option. TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`) so the generated DDL also parses on plain MySQL. Requires Ruby 3.2+, Rails/ActiveRecord 7.2+, TiDB 5.0+.
+A Ruby gem providing a Rails ActiveRecord adapter for TiDB. It extends the standard `Mysql2Adapter` to support TiDB-specific DDL features in migrations. Requires Ruby 3.2+, Rails/ActiveRecord 7.2+, TiDB 5.0+.
+
+## Details
+
+Supported TiDB-specific DDL: clustered/non-clustered primary keys (`clustered: true/false`), `auto_id_cache`, `shard_row_id_bits`, and `pre_split_regions` table options, and the column-level `auto_random` option. TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`) so the generated DDL also parses on plain MySQL; `auto_random` additionally falls back to `AUTO_INCREMENT` when the connected server is not TiDB (see `TidbAdapter#tidb?`).
 
 ## Commands
 
