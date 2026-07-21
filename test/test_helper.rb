@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "activerecord/tidb/adapter"
-require "activerecord-tidb-adapter"
+require "activerecord/tidb/ddl/adapter"
+require "activerecord-tidb-ddl-adapter"
 require "active_record"
 
 require "minitest/autorun"

@@ -1,4 +1,4 @@
-require "activerecord/tidb/adapter/version"
+require "activerecord/tidb/ddl/adapter/version"
 require "activerecord/connection_adapters/tidb_adapter"
 require "activerecord/tasks/tidb_database_tasks"
 

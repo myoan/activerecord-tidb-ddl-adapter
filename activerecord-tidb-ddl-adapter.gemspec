@@ -1,17 +1,17 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "activerecord/tidb/adapter/version"
+require "activerecord/tidb/ddl/adapter/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "activerecord-tidb-adapter"
-  spec.version       = Activerecord::Tidb::Adapter::VERSION
+  spec.name          = "activerecord-tidb-ddl-adapter"
+  spec.version       = Activerecord::Tidb::Ddl::Adapter::VERSION
   spec.authors       = ["myoan"]
   spec.email         = ["motoki.yoan@gmail.com"]
 
   spec.summary       = %q{Rails ActiveRecord gem that supports TiDB custom keyword for migration}
   spec.description   = %q{Rails ActiveRecord gem that supports TiDB custom keyrord for migration}
-  spec.homepage      = "https://github.com/myoan/activerecord-tidb-adapter"
+  spec.homepage      = "https://github.com/myoan/activerecord-tidb-ddl-adapter"
 
   # # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # # to allow pushing to a single host or delete this section to allow pushing to any host.

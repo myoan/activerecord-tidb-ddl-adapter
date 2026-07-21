@@ -1,4 +1,4 @@
-# ActiveRecord TiDB Adapter
+# ActiveRecord TiDB DDL Adapter
 
 A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific features, particularly support for clustered and non-clustered indexes in migrations.
 
@@ -20,7 +20,7 @@ A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific feat
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'activerecord-tidb-adapter'
+gem 'activerecord-tidb-ddl-adapter'
 ```
 
 And then execute:
@@ -32,7 +32,7 @@ $ bundle install
 Or install it yourself as:
 
 ```bash
-$ gem install activerecord-tidb-adapter
+$ gem install activerecord-tidb-ddl-adapter
 ```
 
 ## Requirements
@@ -264,7 +264,7 @@ TBD.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/myoan/activerecord-tidb-adapter.
+Bug reports and pull requests are welcome on GitHub at https://github.com/myoan/activerecord-tidb-ddl-adapter.
 
 ## License
 

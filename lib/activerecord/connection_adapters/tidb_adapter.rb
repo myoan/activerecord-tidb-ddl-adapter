@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "activerecord/tidb/adapter/version"
+require "activerecord/tidb/ddl/adapter/version"
 require "active_support"
 require "active_record"
 

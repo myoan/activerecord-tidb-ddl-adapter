@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Ruby gem providing a Rails ActiveRecord adapter for TiDB. It extends the standard `Mysql2Adapter` to support TiDB-specific DDL features in migrations. Requires Ruby 3.2+, Rails/ActiveRecord 7.2+, TiDB 5.0+.
+A Ruby gem (`activerecord-tidb-ddl-adapter`) providing a Rails ActiveRecord adapter for TiDB. It extends the standard `Mysql2Adapter` to support TiDB-specific DDL features in migrations. Requires Ruby 3.2+, Rails/ActiveRecord 7.2+, TiDB 5.0+.
+
+Not to be confused with PingCAP's own `activerecord-tidb-adapter` (github.com/pingcap/activerecord-tidb-adapter), which this gem's name used to collide with. That gem is an unmaintained MySQL-compatibility shim for pre-6.0 TiDB (SEQUENCE support, capability flag overrides) and implements none of the DDL features this gem is for (clustered/non-clustered PK, `auto_random`, `auto_id_cache`, `shard_row_id_bits`, `pre_split_regions`).
 
 ## Details
 
@@ -24,7 +26,7 @@ bin/console              # IRB with the gem loaded
 
 ## Architecture
 
-Entry point `lib/activerecord-tidb-adapter.rb` registers the `"tidb"` adapter with ActiveRecord via a Railtie (test_helper registers it manually since Rails isn't loaded), and likewise registers `lib/activerecord/tasks/tidb_database_tasks.rb` (`ActiveRecord::Tasks::TiDBDatabaseTasks < MySQLDatabaseTasks`) with `ActiveRecord::Tasks::DatabaseTasks.register_task(/tidb/, ...)` — without this, `db:create`/`db:drop`/`db:purge`/`db:structure:dump`/`db:structure:load` raise `DatabaseNotSupported` because the adapter name `"tidb"` doesn't match Rails' built-in `/mysql/` pattern. The adapter layers TiDB behavior on top of the MySQL2 adapter classes:
+Entry point `lib/activerecord-tidb-ddl-adapter.rb` registers the `"tidb"` adapter with ActiveRecord via a Railtie (test_helper registers it manually since Rails isn't loaded), and likewise registers `lib/activerecord/tasks/tidb_database_tasks.rb` (`ActiveRecord::Tasks::TiDBDatabaseTasks < MySQLDatabaseTasks`) with `ActiveRecord::Tasks::DatabaseTasks.register_task(/tidb/, ...)` — without this, `db:create`/`db:drop`/`db:purge`/`db:structure:dump`/`db:structure:load` raise `DatabaseNotSupported` because the adapter name `"tidb"` doesn't match Rails' built-in `/mysql/` pattern. The adapter layers TiDB behavior on top of the MySQL2 adapter classes:
 
 - `lib/activerecord/connection_adapters/tidb_adapter.rb` — `TidbAdapter < Mysql2Adapter`. Connection setup, capability flags (`supports_clustered_index?` gates on TiDB >= 5.0).
 - `lib/activerecord/connection_adapters/tidb/schema_statements.rb` — `TiDB::SchemaStatements`, included into the adapter. Wires in the TiDB `SchemaCreation`/`TableDefinition` and whitelists the TiDB options via `valid_table_definition_options`.
@@ -33,4 +35,4 @@ Entry point `lib/activerecord-tidb-adapter.rb` registers the `"tidb"` adapter wi
 
 The `clustered` option flows through two paths: table-level (`create_table :users, clustered: true`) via `TableDefinition#set_primary_key`, and column-level (`t.bigint :id, primary_key: true, clustered: false`) via `SchemaCreation#add_column_options!`. Adding a new TiDB option requires touching all three tidb/ files: whitelist it, capture it in `TableDefinition`, and render it in `SchemaCreation`.
 
-Note the two namespaces: `ActiveRecord::ConnectionAdapters::TiDB::*` for adapter code, and `Activerecord::Tidb::Adapter` (in `lib/activerecord/tidb/`) for the gem version/module boilerplate.
+Note the two namespaces: `ActiveRecord::ConnectionAdapters::TiDB::*` for adapter code, and `Activerecord::Tidb::Ddl::Adapter` (in `lib/activerecord/tidb/ddl/`) for the gem version/module boilerplate.
