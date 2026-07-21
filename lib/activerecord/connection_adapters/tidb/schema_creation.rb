@@ -39,7 +39,11 @@ module ActiveRecord
           # MySQL ignores them, so the generated DDL stays MySQL-compatible.
           # auto_random accepts true (server default shard bits), an Integer
           # (shard bits), or an Array of [shard_bits, range_bits].
+          # Plain MySQL ignores TiDB version comments and would leave the
+          # column without any id generation, so fall back to AUTO_INCREMENT.
           def auto_random_sql(auto_random)
+            return " AUTO_INCREMENT" unless @conn.tidb?
+
             args =
               case auto_random
               when true

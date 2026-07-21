@@ -50,6 +50,13 @@ module ActiveRecord
         database_version >= "5.0.0"  # TiDB 5.0+でサポート
       end
 
+      # The tidb adapter can also connect to a plain MySQL server; some
+      # features (e.g. AUTO_RANDOM) need to know which one they talk to.
+      def tidb?
+        return @tidb unless @tidb.nil?
+        @tidb = full_version.include?("TiDB")
+      end
+
       def supports_json?
         true
       end

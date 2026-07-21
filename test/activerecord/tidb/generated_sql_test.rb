@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class GeneratedSqlTableClustered < ActiveRecord::Migration[7.2]
   def change
@@ -139,6 +140,14 @@ class Activerecord::Tidb::GeneratedSqlTest < Minitest::Test
   def test_auto_random_without_args_uses_version_comment
     sql = capture_create_table_sql(GeneratedSqlAutoRandomDefault)
     assert_includes sql, "/*T![auto_rand] AUTO_RANDOM */"
+  end
+
+  def test_auto_random_falls_back_to_auto_increment_on_mysql
+    connection.stub(:tidb?, false) do
+      sql = capture_create_table_sql(GeneratedSqlAutoRandom)
+      assert_includes sql, "AUTO_INCREMENT"
+      refute_includes sql, "AUTO_RANDOM"
+    end
   end
 
   def test_auto_random_conflicts_with_auto_increment

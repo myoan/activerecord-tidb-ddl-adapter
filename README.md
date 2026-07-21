@@ -9,7 +9,7 @@ A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific feat
   - `auto_id_cache`: Configure AUTO_ID_CACHE for better auto-increment performance
   - `shard_row_id_bits`: Distribute row IDs across multiple shards
   - `pre_split_regions`: Pre-split table regions for better initial performance
-- **AUTO_RANDOM Support**: Generate randomized primary key values to avoid write hotspots (column-level `auto_random` option)
+- **AUTO_RANDOM Support**: Generate randomized primary key values to avoid write hotspots (column-level `auto_random` option; falls back to `AUTO_INCREMENT` on plain MySQL)
 - **TiDB 5.0+ Compatible**: Supports TiDB's clustered index feature introduced in version 5.0
 - **MySQL-Compatible DDL**: TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`), which MySQL ignores — the same migrations run against both TiDB and MySQL
 - **Seamless Integration**: Extends the standard MySQL2 adapter, maintaining compatibility with existing Rails applications
@@ -247,7 +247,9 @@ CREATE TABLE `tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-`auto_random` accepts `true` (server default shard bits), an Integer (shard bits), or an Array of `[shard_bits, range_bits]`. Note that AUTO_RANDOM requires a `bigint` clustered primary key, and that on MySQL the comment is ignored, so the column is a plain `bigint` primary key — applications must supply ids themselves there.
+`auto_random` accepts `true` (server default shard bits), an Integer (shard bits), or an Array of `[shard_bits, range_bits]`. Note that AUTO_RANDOM requires a `bigint` clustered primary key.
+
+When connected to a plain MySQL server instead of TiDB, `auto_random` falls back to `AUTO_INCREMENT`, so ids are auto-generated on both servers. Keep in mind the generated values differ in nature: random on TiDB, sequential on MySQL — don't rely on id ordering.
 
 ## Development
 
