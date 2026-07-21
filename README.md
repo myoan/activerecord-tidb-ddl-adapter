@@ -13,6 +13,7 @@ A Rails ActiveRecord adapter that extends MySQL2 adapter with TiDB-specific feat
 - **TiDB 5.0+ Compatible**: Supports TiDB's clustered index feature introduced in version 5.0
 - **MySQL-Compatible DDL**: TiDB-specific keywords are emitted inside TiDB version comments (`/*T![feature_id] ... */`), which MySQL ignores — the same migrations run against both TiDB and MySQL
 - **Seamless Integration**: Extends the standard MySQL2 adapter, maintaining compatibility with existing Rails applications
+- **Rake Task Support**: `db:create`, `db:drop`, `db:purge`, and `db:structure:dump`/`db:structure:load` all work against a `tidb` connection
 
 ## Installation
 
@@ -55,6 +56,8 @@ development:
   username: root
   password:
 ```
+
+With this in place, the standard `db:create`, `db:drop`, `db:purge`, `db:charset`, `db:collation`, and `db:structure:dump`/`db:structure:load` rake tasks work as they would for the `mysql2` adapter (they shell out to `mysqldump`/`mysql`, which are wire-compatible with TiDB).
 
 ### Clustered Index in Migrations
 

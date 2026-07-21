@@ -24,7 +24,7 @@ bin/console              # IRB with the gem loaded
 
 ## Architecture
 
-Entry point `lib/activerecord-tidb-adapter.rb` registers the `"tidb"` adapter with ActiveRecord via a Railtie (test_helper registers it manually since Rails isn't loaded). The adapter layers TiDB behavior on top of the MySQL2 adapter classes:
+Entry point `lib/activerecord-tidb-adapter.rb` registers the `"tidb"` adapter with ActiveRecord via a Railtie (test_helper registers it manually since Rails isn't loaded), and likewise registers `lib/activerecord/tasks/tidb_database_tasks.rb` (`ActiveRecord::Tasks::TiDBDatabaseTasks < MySQLDatabaseTasks`) with `ActiveRecord::Tasks::DatabaseTasks.register_task(/tidb/, ...)` — without this, `db:create`/`db:drop`/`db:purge`/`db:structure:dump`/`db:structure:load` raise `DatabaseNotSupported` because the adapter name `"tidb"` doesn't match Rails' built-in `/mysql/` pattern. The adapter layers TiDB behavior on top of the MySQL2 adapter classes:
 
 - `lib/activerecord/connection_adapters/tidb_adapter.rb` — `TidbAdapter < Mysql2Adapter`. Connection setup, capability flags (`supports_clustered_index?` gates on TiDB >= 5.0).
 - `lib/activerecord/connection_adapters/tidb/schema_statements.rb` — `TiDB::SchemaStatements`, included into the adapter. Wires in the TiDB `SchemaCreation`/`TableDefinition` and whitelists the TiDB options via `valid_table_definition_options`.
