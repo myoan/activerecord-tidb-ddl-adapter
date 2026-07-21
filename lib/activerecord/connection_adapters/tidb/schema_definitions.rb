@@ -23,6 +23,18 @@ module ActiveRecord
               id = id.fetch(:type, :primary_key)
             end
 
+            # ActiveRecord::Migration::Compatibility::V5_0#create_table forces
+            # `default: nil` onto integer/bigint id columns unless
+            # connection.adapter_name is "Mysql2"/"Trilogy" (a hardcoded
+            # string check TidbAdapter's "TiDB" name doesn't match). That
+            # stray `default` key then defeats new_column_definition's
+            # integer_like_primary_key? check, so AUTO_INCREMENT never gets
+            # added when old migrations run against TiDB. Drop it here so
+            # `id: :bigint`/`id: :integer` keep auto-incrementing as intended.
+            if [:integer, :bigint].include?(id) && options.key?(:default) && options[:default].nil?
+              options.delete(:default)
+            end
+
             if pk.is_a?(Array)
               primary_keys(pk, @clustered)
             else

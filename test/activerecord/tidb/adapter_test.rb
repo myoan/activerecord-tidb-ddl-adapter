@@ -69,6 +69,14 @@ class AutoRandomInColumn < ActiveRecord::Migration[7.2]
   end
 end
 
+class LegacyMigrationBigintId < ActiveRecord::Migration[5.0]
+  def change
+    create_table :users, id: :bigint do |t|
+      t.string "name"
+    end
+  end
+end
+
 class TableWithCompositeIndex < ActiveRecord::Migration[7.2]
   def change
     create_table :users do |t|
@@ -206,6 +214,25 @@ class Activerecord::Tidb::AdapterTest < Minitest::Test
         `id` bigint NOT NULL,
         `name` varchar(255) NOT NULL,
         PRIMARY KEY (`id`,`name`) /*T![clustered_index] CLUSTERED */
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+    QUERY
+    assert_equal expected_query, query
+  end
+
+  # ActiveRecord::Migration::Compatibility::V5_0#create_table forces
+  # `default: nil` onto integer/bigint id columns unless
+  # connection.adapter_name is "Mysql2"/"Trilogy", which suppresses Rails'
+  # own AUTO_INCREMENT inference for TiDB's "TiDB" adapter name.
+  def test_legacy_migration_bigint_id_still_gets_auto_increment
+    migrate(LegacyMigrationBigintId)
+
+    result = connection.execute("SHOW CREATE TABLE users")
+    _, query = result.first
+    expected_query = <<~QUERY.strip
+      CREATE TABLE `users` (
+        `id` bigint NOT NULL AUTO_INCREMENT,
+        `name` varchar(255) DEFAULT NULL,
+        PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
     QUERY
     assert_equal expected_query, query
