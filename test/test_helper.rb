@@ -14,7 +14,7 @@ conn_opt = {
   password: ""
 }
 
-ActiveRecord::ConnectionAdapters.register("tidb", "ActiveRecord::ConnectionAdapters::TidbAdapter", "active_record/connection_adapters/tidb_adapter")
+ActiveRecord::ConnectionAdapters.register("tidb", "ActiveRecord::ConnectionAdapters::TidbAdapter", "activerecord/connection_adapters/tidb_adapter")
 ActiveRecord::Tasks::DatabaseTasks.register_task(/tidb/, "ActiveRecord::Tasks::TiDBDatabaseTasks")
 ActiveRecord::Base.establish_connection(**conn_opt)
 
